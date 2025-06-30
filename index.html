@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kepler College AI Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #f7f7f7;
+            height: 100vh;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .dark-mode {
+            background: #1a1a1a;
+            color: #e5e5e5;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-bottom: 1px solid #e5e5e5;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+
+        .dark-mode .header {
+            background: #2d2d2d;
+            border-bottom-color: #404040;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            flex-shrink: 0;
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+
+        .title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .dark-mode .title {
+            color: #e5e5e5;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-btn {
+            background: none;
+            border: none;
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.2s ease;
+        }
+
+        .header-btn:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .dark-mode .header-btn {
+            color: #999;
+        }
+
+        .dark-mode .header-btn:hover {
+            background: #404040;
+            color: #e5e5e5;
+        }
+
+        /* Main Container */
+        .main-container {
+            display: flex;
+            height: 100vh;
+            padding-top: 60px;
+        }
+
+        /* Chat Container */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 800px;
+            margin: 0 auto;
+            height: calc(100vh - 60px);
+        }
+
+        /* Messages Area */
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            scroll-behavior: smooth;
+        }
+
+        .message {
+            margin-bottom: 24px;
+            display: flex;
+            gap: 12px;
+            max-width: 100%;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            margin-top: 4px;
+        }
+
+        .user-avatar {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .dark-mode .user-avatar {
+            background: #1976d2;
+            color: white;
+        }
+
+        .bot-avatar {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: white;
+        }
+
+        .message-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .message-text {
+            background: white;
+            padding: 16px 20px;
+            border-radius: 18px;
+            border: 1px solid #e5e5e5;
+            line-height: 1.6;
+            color: #1a1a1a;
+            word-wrap: break-word;
+        }
+
+        .dark-mode .message-text {
+            background: #2d2d2d;
+            border-color: #404040;
+            color: #e5e5e5;
+        }
+
+        .user-message .message-text {
+            background: #007aff;
+            color: white;
+            border-color: #007aff;
+            margin-left: auto;
+            max-width: 80%;
+        }
+
+        .message-time {
+            font-size: 12px;
+            color: #999;
+            margin-top: 6px;
+            padding-left: 4px;
+        }
+
+        /* Welcome Message with Animation */
+        .welcome-message {
+            text-align: center;
+            padding: 48px 24px;
+            color: #666;
+            opacity: 0;
+            animation: fadeInUp 1s ease-out forwards;
+        }
+
+        .dark-mode .welcome-message {
+            color: #999;
+        }
+
+        .welcome-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #1a1a1a;
+            background: linear-gradient(135deg, #ff6b35, #f7931e, #007aff);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease-in-out infinite, typewriter 2s steps(30) 0.5s both;
+            position: relative;
+        }
+
+        .dark-mode .welcome-title {
+            background: linear-gradient(135deg, #ff6b35, #f7931e, #64b5f6);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .welcome-subtitle {
+            font-size: 16px;
+            line-height: 1.6;
+            opacity: 0;
+            animation: fadeIn 1s ease-out 1.5s forwards;
+        }
+
+        /* Floating particles animation */
+        .welcome-message::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(255, 107, 53, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 122, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(247, 147, 30, 0.1) 0%, transparent 50%);
+            animation: float 6s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes gradientShift {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        @keyframes typewriter {
+            from {
+                width: 0;
+            }
+            to {
+                width: 100%;
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            33% {
+                transform: translateY(-10px) rotate(1deg);
+            }
+            66% {
+                transform: translateY(5px) rotate(-1deg);
+            }
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 18px;
+            margin-bottom: 24px;
+        }
+
+        .dark-mode .typing-indicator {
+            background: #2d2d2d;
+            border-color: #404040;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: #999;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Input Area */
+        .input-area {
+            padding: 24px;
+            background: white;
+            border-top: 1px solid #e5e5e5;
+        }
+
+        .dark-mode .input-area {
+            background: #2d2d2d;
+            border-top-color: #404040;
+        }
+
+        .input-container {
+            max-width: 100%;
+            position: relative;
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: flex-end;
+            background: #f8f9fa;
+            border: 2px solid #e5e5e5;
+            border-radius: 24px;
+            padding: 12px 16px;
+            transition: all 0.2s ease;
+        }
+
+        .dark-mode .input-wrapper {
+            background: #1a1a1a;
+            border-color: #404040;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: #007aff;
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+        }
+
+        .input-field {
+            flex: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 16px;
+            line-height: 1.5;
+            resize: none;
+            min-height: 24px;
+            max-height: 120px;
+            font-family: inherit;
+            color: #1a1a1a;
+        }
+
+        .dark-mode .input-field {
+            color: #e5e5e5;
+        }
+
+        .input-field::placeholder {
+            color: #999;
+        }
+
+        .send-button {
+            background: #007aff;
+            border: none;
+            border-radius: 12px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-left: 12px;
+            transition: all 0.2s ease;
+            color: white;
+        }
+
+        .send-button:hover:not(:disabled) {
+            background: #0051d5;
+            transform: scale(1.05);
+        }
+
+        .send-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .dark-mode .send-button:disabled {
+            background: #555;
+        }
+
+        /* Scrollbar */
+        .messages-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .messages-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .messages-container::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 3px;
+        }
+
+        .dark-mode .messages-container::-webkit-scrollbar-thumb {
+            background: #555;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .chat-container {
+                max-width: 100%;
+            }
+
+            .messages-container {
+                padding: 16px;
+            }
+
+            .input-area {
+                padding: 16px;
+            }
+
+            .message {
+                margin-bottom: 16px;
+            }
+
+            .header {
+                padding: 12px 16px;
+            }
+
+            .welcome-message {
+                padding: 32px 16px;
+            }
+
+            .welcome-title {
+                font-size: 24px;
+            }
+
+            .title {
+                font-size: 14px;
+            }
+
+            .logo {
+                width: 32px;
+                height: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">
+                <img src="C:\Users\HP\Desktop\Turikepler\assets\kepler2.png" alt="Kepler Logo">
+            </div>
+            <div class="title">Kepler College AI Assistant</div>
+        </div>
+        <div class="header-right">
+            <button class="header-btn" onclick="clearChat()" title="New Chat">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18l-2 13H5L3 6z"/>
+                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+            </button>
+            <button class="header-btn" onclick="toggleDarkMode()" title="Toggle Theme">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5"/>
+                    <line x1="12" y1="1" x2="12" y2="3"/>
+                    <line x1="12" y1="21" x2="12" y2="23"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line x1="1" y1="12" x2="3" y2="12"/>
+                    <line x1="21" y1="12" x2="23" y2="12"/>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <div class="chat-container">
+            <!-- Messages Container -->
+            <div class="messages-container" id="messagesContainer">
+                <div class="welcome-message">
+                    <h1 class="welcome-title">Welcome to Kepler College AI Assistant</h1>
+                    <p class="welcome-subtitle">I'm here to help you with any questions about our college, programs, admissions, and campus life. What would you like to know?</p>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="input-area">
+                <div class="input-container">
+                    <div class="input-wrapper">
+                        <textarea 
+                            class="input-field" 
+                            id="messageInput" 
+                            placeholder="Ask me anything about Kepler College..."
+                            rows="1"
+                        ></textarea>
+                        <button class="send-button" id="sendButton" disabled>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"/>
+                                <polygon points="22,2 15,22 11,13 2,9 22,2"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isTyping = false;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            setupInputHandlers();
+            loadUserPreferences();
+        });
+
+        // Setup input handlers
+        function setupInputHandlers() {
+            const input = document.getElementById('messageInput');
+            const sendButton = document.getElementById('sendButton');
+
+            // Auto-resize textarea
+            input.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+                
+                // Enable/disable send button
+                sendButton.disabled = this.value.trim().length === 0;
+            });
+
+            // Send on Enter (Shift+Enter for new line)
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            sendButton.addEventListener('click', sendMessage);
+        }
+
+        // Send message
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (message === '' || isTyping) return;
+            
+            // Add user message
+            addMessage(message, 'user');
+            
+            // Clear input
+            input.value = '';
+            input.style.height = 'auto';
+            document.getElementById('sendButton').disabled = true;
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            // Simulate AI response
+            setTimeout(() => {
+                hideTypingIndicator();
+                const response = generateResponse(message);
+                addMessage(response, 'bot');
+            }, Math.random() * 2000 + 1000);
+        }
+
+        // Add message to chat
+        function addMessage(text, sender) {
+            const container = document.getElementById('messagesContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            const timestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            if (sender === 'user') {
+                messageDiv.innerHTML = `
+                    <div class="message-content">
+                        <div class="message-text">${text}</div>
+                        <div class="message-time">${timestamp}</div>
+                    </div>
+                    <div class="message-avatar user-avatar">👤</div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="message-avatar bot-avatar">K</div>
+                    <div class="message-content">
+                        <div class="message-text">${text}</div>
+                        <div class="message-time">${timestamp}</div>
+                    </div>
+                `;
+            }
+            
+            container.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            setTimeout(() => {
+                container.scrollTop = container.scrollHeight;
+            }, 100);
+        }
+
+        // Typing indicator
+        function showTypingIndicator() {
+            isTyping = true;
+            const container = document.getElementById('messagesContainer');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot-message';
+            typingDiv.id = 'typingIndicator';
+            typingDiv.innerHTML = `
+                <div class="message-avatar bot-avatar">K</div>
+                <div class="message-content">
+                    <div class="typing-indicator" style="display: flex;">
+                        <div class="typing-dots">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(typingDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            isTyping = false;
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+
+        // Generate response (integrate with your data.js)
+        function generateResponse(message) {
+            // This is where you'd integrate with your data.js file
+            // For now, using sample responses
+            const responses = [
+                "Thank you for your question about Kepler College! I'd be happy to help you with information about our programs and admissions.",
+                "Great question! Kepler College offers a wide range of academic programs designed to prepare students for success in their chosen fields.",
+                "I'm here to assist you with any questions about campus life, admissions requirements, or our academic offerings at Kepler College.",
+                "That's an excellent question! Let me provide you with detailed information about what Kepler College has to offer."
+            ];
+            
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        // Utility functions
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        }
+
+        function clearChat() {
+            const container = document.getElementById('messagesContainer');
+            container.innerHTML = `
+                <div class="welcome-message">
+                    <h1 class="welcome-title">Welcome to Kepler College AI Assistant</h1>
+                    <p class="welcome-subtitle">I'm here to help you with any questions about our college, programs, admissions, and campus life. What would you like to know?</p>
+                </div>
+            `;
+        }
+
+        function loadUserPreferences() {
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+            }
+        }
+    </script>
+    <script src="data.js"></script> 
+</body>
+</html>
